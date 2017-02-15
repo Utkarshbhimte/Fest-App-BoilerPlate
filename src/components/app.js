@@ -8,22 +8,24 @@ class App extends Component {
     constructor(){
         super();
         this.state = {
-            events: null,
-            favEvents: false,
-            profile: null,
-            activeTab: 1
+            events: null,           // Object of all arrays
+            registeredEvents: {},   // State of Confirmation of Registration
+            profile: null,          // User's Profile
+            activeTab: 1            // Tab Status
         };
         this.renderEventCards = this.renderEventCards.bind(this);
         this.onTabClick = this.onTabClick.bind(this);
-        this.toggleFav = this.toggleFav.bind(this);
+        this.toggleRegistration = this.toggleRegistration.bind(this);
     }
 
+    // Importing all the Events
     componentWillMount(){
         this.setState({
             events: allEvents
         });
     }
 
+    // Rendering the EventCard
     renderEventCards(key){
         const event = this.state.events[key];
         const day = key.slice(0,2);
@@ -46,6 +48,7 @@ class App extends Component {
         )
     }
 
+    // Filtering the Events acc to the Tabs
     onTabClick = (state) => {
         console.log('changed state to',state);
         this.setState({
@@ -56,30 +59,30 @@ class App extends Component {
     filterCards = (key) => {
         const event = this.state.events[key];
         const day = key.slice(0,2);
-        // console.log(day, event);
 
-        if(this.state.activeTab === 1 && day === '01'){
-            console.log('one');
-            return (this.state.activeTab === 1 && day === '01');
-
-        }else if(this.state.activeTab === 2 && day === '02'){
-            console.log('two');
-            return (this.state.activeTab === 2 && day === '02');
+        if(this.state.activeTab === 1){
+            return (day === '01');
+        }else if(this.state.activeTab === 2){
+            return (day === '02');
         }else if(this.state.activeTab === 0){
-            console.log('fav');
-            return (this.state.activeTab === 0 && event.fav );
+            return ( event.registered );
         }
     };
 
-    toggleFav = (key) => {
-        const event = this.state.events[key];
+    // Add or remove from RegisteredEvents
+    toggleRegistration = (key) => {
+        let registeredEvents = {...this.state.registeredEvents};
         let events = {...this.state.events};
-        // if(events[key].fav){
-        events[key].fav = !events[key].fav;
-        // }else if(!events[key].fav){
-        //     events[key].fav = true;
-        // }
-        this.setState({events})
+
+        if(registeredEvents.hasOwnProperty(key) && !(events[key].regis_confirmed)){
+            delete registeredEvents[key];
+            events[key].registered = false;
+        }else{
+            events[key].registered = true;
+            registeredEvents[key] = false;
+        }
+
+        this.setState({events, registeredEvents})
     };
 
     render(){
@@ -91,7 +94,7 @@ class App extends Component {
                     {Object.keys(this.state.events)
                         .filter((key) =>this.filterCards(key))
                         .map( (key) =>
-                            <EventCard key={key} index={key} toggleFav={this.toggleFav}
+                            <EventCard key={key} index={key} toggleRegistration={this.toggleRegistration}
                                        event={this.state.events[key]}/>
                         )}
                 </div>

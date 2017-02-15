@@ -10,14 +10,13 @@ class EventCard extends Component {
 
         return(
             <div className="card">
-                <div className="basic">
+                <div className="basic" onClick={() => this.props.toggleRegistration(this.props.index)}>
                     <div className="day-wrap">
                         <span>DAY</span>
                         <h3>{day}</h3>
                     </div>
-                    <fav onClick={() => this.props.toggleFav(this.props.index)}
-                         className={ event.fav ? 'active' : ''}
-                    > </fav>
+                    <fav className={ event.registered ? 'active' : '' }
+                         aria-confirmed={ event.regis_confirmed && event.registered }> </fav>
                     <div className="details">
                         <span className="location">{event.location}</span>
                         {/*<span className="contact">{event.contact}</span>*/}
@@ -26,9 +25,20 @@ class EventCard extends Component {
                 <div className="main">
                     <h2>{event.name}</h2>
                     <span className="s_time">{event.time}</span>
-                    <p>{event.desc}</p>
+                    <div className="more active">
+                        <ul>
+                            {event.desc.split('.').map( function(point, k) {
+                                return(
+                                    <li key={k}>{point}</li>
+                                )
+                            })}
+                        </ul>
+                    </div>
+                    <div className="btn-wrap">
+                        <a>Contact</a>
+                        {/*<a>Register</a>*/}
+                    </div>
                 </div>
-                <div className="more"></div>
             </div>
         )
     }

@@ -226,9 +226,10 @@ body input {
 .contain-all {
   height: 100vh;
   overflow-x: hidden;
+  background: -webkit-linear-gradient(330deg, #89f7fe 0%, #66a6ff 100%);
+  background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
 }
 .contain-all .message-wrap {
-  background-color: $cardBack;
   position: relative;
   min-height: 80%;
 }
@@ -313,12 +314,30 @@ header .tabs-wrap .tab.active {
   width: 35px;
   height: 35px;
   border-radius: 50%;
-  border: 1px solid #fff;
-  -webkit-transition: all 0.3s ease-in-out;
-  transition: all 0.3s ease-in-out;
+  border: 1px solid #66a6ff;
+  -webkit-transition: all 3s ease-in-out;
+  transition: all 3s ease-in-out;
 }
 .card-wrap .card .basic fav.active {
-  background-color: #fff;
+  background: -webkit-linear-gradient(330deg, #89f7fe 0%, #66a6ff 100%);
+  background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
+  border: 0;
+  -webkit-transition: all 3s ease-in-out;
+  transition: all 3s ease-in-out;
+}
+.card-wrap .card .basic fav[aria-confirmed='true'] {
+  border-radius: 0;
+  width: auto;
+  height: auto;
+  color: #66a6ff;
+  background: #212121 !important;
+  border: 2px solid #66a6ff;
+}
+.card-wrap .card .basic fav[aria-confirmed='true']:before {
+  content: 'conf';
+  text-transform: uppercase;
+  display: inline-block;
+  padding: 0.5em 1em;
 }
 .card-wrap .card .basic .details span {
   font-size: 1.5em;
@@ -326,6 +345,9 @@ header .tabs-wrap .tab.active {
 }
 .card-wrap .card .main {
   padding: 1em;
+  position: relative;
+  width: 100%;
+  min-height: 25vh;
 }
 .card-wrap .card .main h2 {
   margin: 0 0 0.3em 0;
@@ -335,6 +357,35 @@ header .tabs-wrap .tab.active {
   letter-spacing: 2px;
   font-weight: 700;
 }
-.card-wrap .card p {
+.card-wrap .card .main .s_time {
   font-size: 1.4em;
+}
+.card-wrap .card .main .more ul {
+  padding-left: 1em;
+}
+.card-wrap .card .main .more ul li {
+  list-style: none;
+  padding: 0.5em;
+}
+.card-wrap .card .main .btn-wrap {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+.card-wrap .card .main .btn-wrap a {
+  display: inline-block;
+  background-color: #212121;
+  color: #fff;
+  padding: 0.6em 1em;
+  text-transform: uppercase;
+  border: none;
+  outline: none;
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
 }

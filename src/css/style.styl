@@ -16,8 +16,8 @@ html, body
 .contain-all
   height 100vh
   overflow-x hidden
+  background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
   .message-wrap
-    background-color $cardBack
     position relative
     min-height 80%
     .messages
@@ -74,16 +74,34 @@ header
         width: 35px
         height 35px
         border-radius 50%
-        border 1px solid white
-        transition all .3s ease-in-out
+        border 1px solid #66a6ff
+        transition all 3s ease-in-out
         &.active
-          background-color white
+          background linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
+          border 0
+          transition all 3s ease-in-out
+        &[aria-confirmed='true']
+          border-radius 0
+          width auto
+          height auto
+          color: #66a6ff
+          background #212121 !important
+          border 2px solid #66a6ff
+          &:before
+            content 'conf'
+            text-transform uppercase
+            display inline-block
+            padding .5em 1em
+
       .details
         span
           font-size 1.5em
           display block
     .main
       padding 1em
+      position relative
+      width 100%
+      min-height 25vh
       h2
         margin 0 0 .3em 0
         font-size 2em
@@ -91,5 +109,26 @@ header
         text-transform uppercase
         letter-spacing 2px
         font-weight 700
-    p
-      font-size 1.4em
+      .s_time
+        font-size 1.4em
+      .more
+        ul
+          padding-left 1em
+          li
+            list-style none
+            padding .5em
+      .btn-wrap
+        display flex
+        justify-content flex-end
+        flex-wrap wrap
+        a
+          display inline-block
+          background-color #212121
+          color white
+          padding .6em 1em
+          text-transform uppercase
+          border none
+          outline none
+          font-size 1.5em
+          margin-bottom .5em
+          margin-right .5em
