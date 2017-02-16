@@ -4,6 +4,14 @@
 import React, {Component} from 'react';
 
 class EventCard extends Component {
+    constructor(){
+        super();
+        this.getAdminAccess = this.getAdminAccess.bind(this)
+
+    }
+    getAdminAccess = () => {
+        return true;
+    }
     render() {
         const event = this.props.event;
         const day = this.props.index.slice(0,2);
@@ -36,7 +44,12 @@ class EventCard extends Component {
                     </div>
                     <div className="btn-wrap">
                         <a>Contact</a>
-                        {/*<a>Register</a>*/}
+                        { ( !event.registered  || !event.regis_confirmed) &&
+                            <a onClick={ () => {this.props.openModal(this.props.index)}}>Register and Pay</a>
+                        }
+                        { this.getAdminAccess &&
+                        <a onClick={ () => {this.props.openAdminModal()} }> Recieve Payment</a>
+                        }
                     </div>
                 </div>
             </div>
