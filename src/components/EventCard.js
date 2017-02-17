@@ -1,6 +1,3 @@
-/**
- * Created by utkarsh on 15/02/17.
- */
 import React, {Component} from 'react';
 
 class EventCard extends Component {
@@ -15,16 +12,15 @@ class EventCard extends Component {
     render() {
         const event = this.props.event;
         const day = this.props.index.slice(0,2);
-
         return(
             <div className="card">
-                <div className="basic" onClick={() => this.props.toggleRegistration(this.props.index)}>
+                <div className="basic">
                     <div className="day-wrap">
                         <span>DAY</span>
                         <h3>{day}</h3>
                     </div>
-                    <fav className={ event.registered ? 'active' : '' }
-                         aria-confirmed={ event.regis_confirmed && event.registered }> </fav>
+                    <fav aria-confirmed={ this.props.confirmed }>
+                    </fav>
                     <div className="details">
                         <span className="location">{event.location}</span>
                         {/*<span className="contact">{event.contact}</span>*/}
@@ -44,11 +40,11 @@ class EventCard extends Component {
                     </div>
                     <div className="btn-wrap">
                         <a>Contact</a>
-                        { ( !event.registered  || !event.regis_confirmed) &&
+                        { !this.props.confirmed && this.getAdminAccess &&
                             <a onClick={ () => {this.props.openModal(this.props.index)}}>Register and Pay</a>
                         }
                         { this.getAdminAccess &&
-                        <a onClick={ () => {this.props.openAdminModal()} }> Recieve Payment</a>
+                            <a onClick={ () => {this.props.openAdminModal()} }> Recieve Payment</a>
                         }
                     </div>
                 </div>

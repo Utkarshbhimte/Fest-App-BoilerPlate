@@ -3,8 +3,7 @@ import { render } from 'react-dom';
 import {BrowserRouter, Match} from 'react-router'
 
 import App from './components/app'
-import Admin from './components/admin'
-
+import Login from './components/login'
 import './css/style.css'
 
 const Root = () => {
@@ -12,7 +11,7 @@ const Root = () => {
         <BrowserRouter>
             <div>
                 <Match exactly pattern='/' component={ App }/>
-                <Match exactly pattern='/admin' component={ Admin }/>
+                <Match exactly pattern='/login' component={ Login }/>
             </div>
         </BrowserRouter>
     )

@@ -48,7 +48,8 @@ header
   padding-top 2em
   .card
     border 2px solid #212121
-    margin 1em
+    margin 1.5em auto
+    width 90vw
     position relative
     display flex
     justify-content flex-start
@@ -73,8 +74,8 @@ header
       fav
         display block
         margin 0 auto
-        width: 35px
-        height 35px
+        width: 48.06px
+        height 48.06px
         border-radius 50%
         border 1px solid #66a6ff
         transition all .3s ease-in-out
@@ -84,7 +85,6 @@ header
           transition all .3s ease-in-out
         &[aria-confirmed='true']
           border-radius 0
-          width auto
           height auto
           color: #66a6ff
           background #212121 !important
@@ -143,7 +143,7 @@ header
     font-size 1.2em
   .part-2, .part-1
     padding 3em 2em
-  span
+  .or
     display block
     width 3em
     height 3em
@@ -157,18 +157,27 @@ header
     border 3px solid #212121
     padding 1em .5em
   &.admin
-    #reader
+    video
       width: 100%
-      height: 300px
       background-color #c3c3c3
       margin-bottom 1em
-    input
-      width: 100%
-      display block
-      outline none
-      border 0
-      border-bottom 1px solid #212121
-      padding .5em 1em
-      font-size 1.5em
-      &::placeholder
+    form
+      #code-submit
+        display block
+        padding .5em 1em
+        border 1px solid #212121
+        background-color white
         text-transform uppercase
+        margin 1em 0 0 auto
+        font-size 1.3em
+        width 40%
+      #code-input
+        width: 100%
+        display block
+        outline none
+        border 0
+        border-bottom 1px solid #212121
+        padding .5em 1em
+        font-size 1.5em
+        &::placeholder
+          text-transform uppercase

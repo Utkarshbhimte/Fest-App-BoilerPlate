@@ -9,10 +9,10 @@ class Header extends Component {
         return (
             <div className="header-wrap">
                 <header>
-                    <h3>Awesome Fest 2017</h3>
+                    <h3 onClick={() => this.props.logout()}>Awesome Fest 2017</h3>
                     <div className="tabs-wrap">
                         <div onClick={() => this.props.onTabClick('0')}
-                             className={ this.props.activeTab===0 ? 'active tab fav' : 'tab fav '}>REGISTERED</div>
+                             className={ this.props.activeTab===0 ? 'active tab fav' : 'tab fav '}>MY SCHEDULE</div>
                         <div onClick={() => this.props.onTabClick('1')}
                              className={ this.props.activeTab===1 ? 'active tab day' : 'tab day'}>1</div>
                         <div onClick={() => this.props.onTabClick('2')}

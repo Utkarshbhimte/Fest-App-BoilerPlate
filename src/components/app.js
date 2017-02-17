@@ -1,74 +1,96 @@
-import React, {Component} from 'react';
-import { Link } from 'react-router';
+import React, {Component} from 'react'
+import { Link } from 'react-router'
 import $ from 'jquery'
 import qrcode from 'qrcode-js'
 import Header from './header'
 import EventCard from './EventCard'
 import allEvents from '../sample-events'
-import Modal from 'react-modal';
+import Modal from 'react-modal'
+import QRReader from '../qrscan'
+import base from '../base'
+
 
 class App extends Component {
     constructor(){
         super();
         this.state = {
-            events: null,           // Object of all arrays
-            registeredEvents: {},   // State of Confirmation of Registration
-            profile: {
-                displayName:"Utkarsh Bhimte",
-                email:"utkarshbhimte95@gmail.com",
-                contact: "9108908806",
-                photoURL:"https://lh6.googleusercontent.com/-z-Cc3sZILsA/AAAAAAAAAAI/AAAAAAAACnI/e9MZYxgdHOU/photo.jpg",
-                uid:"110148726058872940500"
-            },                      // User's Profile
-            activeTab: 1,           // Tab Status
-            modalIsOpen: false,     // Modal State
+            events: null,                // Object of all arrays
+            registeredEvents: [''],      // State of Confirmation of Registration
+            profile: {},                 // User's Profile
+            activeTab: 1,                // Tab Status
+            modalIsOpen: false,          // Modal State
             adminModalIsOpen: false,     // Modal State
-            payingForQR: null,       // CurrentPayment
-            payingFor: false        // CurrentPayment
+            payingForQR: null,           // CurrentPayment
+            payingFor: false,            // CurrentPayment
+            admin_getInfo: 'No Result',
+            admin_finalMessage: '',
+            admin_buyer: null,
+            admin_allCollection: {}
         };
-        this.renderEventCards = this.renderEventCards.bind(this);
         this.onTabClick = this.onTabClick.bind(this);
-        this.toggleRegistration = this.toggleRegistration.bind(this);
-        this.payForEvent = this.payForEvent.bind(this);
+        // this.toggleRegistration = this.toggleRegistration.bind(this);
         this.openModal = this.openModal.bind(this);
         this.openAdminModal = this.openAdminModal.bind(this);
-        this.afterOpenModal = this.afterOpenModal.bind(this);
-        this.afterOpenAdminModal = this.afterOpenAdminModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
-        this.getAdminAccess = this.getAdminAccess.bind(this)
-
+        this.afterOpenAdminModal = this.afterOpenAdminModal.bind(this);
+        this.getAdminAccess = this.getAdminAccess.bind(this);
+        this.startScan = this.startScan.bind(this);
+        this.getDataFromQR = this.getDataFromQR.bind(this);
+        this.getDataFromInput = this.getDataFromInput.bind(this);
+        this.checkConfirmation = this.checkConfirmation.bind(this)
+        this.logout = this.logout.bind(this)
     }
 
     // Importing all the Events
     componentWillMount(){
-        this.setState({
-            events: allEvents
-        });
+        const localStorageUser = localStorage.getItem(`user`);
+        const localStorageCollection = localStorage.getItem(`admin_allCollection`);
+
+        if(localStorageUser) {
+            let profile = JSON.parse(localStorageUser);
+            let admin_allCollection = JSON.parse(localStorageCollection);
+
+            profile['registeredEvents'] = profile['registeredEvents'] ? profile['registeredEvents'] : {};
+            this.firebaseUserRef = base.syncState(`users/${profile.uid}/`, {
+                context: this,
+                state: 'profile'
+            });
+            this.setState({ profile, events: allEvents, admin_allCollection});
+        }else{
+            this.context.router.transitionTo('/login');
+        }
+
+
+        if(this.getAdminAccess){
+            this.firebaseEventsRef = base.syncState(`events/`, {
+                context: this,
+                state: 'events'
+            });
+        }
     }
+
+    componentWillUnmount(){
+        base.removeBinding(this.firebaseUserRef);
+        if(this.getAdminAccess){
+            base.removeBinding(this.firebaseEventsRef);
+        }
+    }
+
+    logout = () => {
+        console.log('loging out..')
+        base.unauth();
+        this.setState({ profile: null });
+        localStorage.setItem(`user`,'');
+        this.context.router.transitionTo('/login');
+    };
+
+    checkConfirmation = (key, uid) => {
+        return this.state.events[key].participants.indexOf(uid) !== -1
+    };
 
     getAdminAccess = () => {
         return true;
-    }
-
-    // Rendering the EventCard
-    renderEventCards(key){
-        const event = this.state.events[key];
-        const day = key.slice(0,2);
-        return(
-            <div className="card" key={key}>
-                <div className="main">
-                    <h2>{event.name}</h2>
-                    <p>{event.desc}</p>
-                    <div className="details">
-                        <span className="location">{event.location}</span>
-                        <span className="s_time">{event.time}</span>
-                        <span className="contact">{event.contact}</span>
-                    </div>
-                </div>
-                <div className="more"></div>
-            </div>
-        )
-    }
+    };
 
     // Filtering the Events acc to the Tabs
     onTabClick = (state) => {
@@ -77,6 +99,7 @@ class App extends Component {
         })
     };
 
+    // Filtering the cards according to the Tab
     filterCards = (key) => {
         const event = this.state.events[key];
         const day = key.slice(0,2);
@@ -86,33 +109,12 @@ class App extends Component {
         }else if(this.state.activeTab === 2){
             return (day === '02');
         }else if(this.state.activeTab === 0){
-            return ( event.registered );
+            return ( this.state.profile.registeredEvents.indexOf(key) !== -1 );
         }
     };
 
-    // Add or remove from RegisteredEvents
-    toggleRegistration = (key) => {
-        let registeredEvents = {...this.state.registeredEvents};
-        let events = {...this.state.events};
-
-        if(registeredEvents.hasOwnProperty(key) && !(events[key].regis_confirmed)){
-            delete registeredEvents[key];
-            events[key].registered = false;
-        }else{
-            events[key].registered = true;
-            registeredEvents[key] = false;
-        }
-
-        this.setState({events, registeredEvents})
-    };
-
-    payForEvent = () => {
-        console.log('pay');
-    };
-
-
-
-    // For the modal
+    // RENDER MODALS
+    // Opening the modal and Geenrating the data for QR Code
     openModal(payingFor) {
         this.setState({modalIsOpen: true, payingFor});
 
@@ -120,68 +122,150 @@ class App extends Component {
         qrData['name'] = this.state.profile.displayName;
         qrData['uid'] = this.state.profile.uid;
         qrData['event'] = payingFor;
-        // qrData = JSON.parse(qrData);
-        console.log(JSON.stringify(qrData));
         const payingForQR = qrcode.toDataURL(JSON.stringify(qrData), 4);
-
         this.setState({ payingForQR });
-        console.log(payingForQR);
     }
 
+    // Modal for 'Pay-and-Register'
+    renderModal = () => {
+        const data = this.state.profile.uid+this.state.payingFor;
+        return(
+            <div className="modal-wrap">
+                <div className="part-1">
+                    <h3>Show this code</h3>
+                    <img src={this.state.payingForQR} alt="QR Code"/>
+                </div>
+                <hr/>
+                <span>OR</span>
+                <div className="part-2">
+                    <h3>Show your User ID</h3>
+                    <h1>{data.replace(/(\d{5})(\d{5})(\d{5})(\d{5})(\d{5})/, "$1-$2-$3-$4-$5")}</h1>
+                </div>
+            </div>
+        )};
+
+    // Modal for Organiser
+    renderAdminModal = () => {
+        // TODO: shorten this 25 digit code
+        return(
+        <div className="admin modal-wrap">
+                <div className="part-1">
+                    <h3>Capture QR code</h3>
+                    <video autoPlay onClick={() => this.scan()}></video>
+                </div>
+                <hr/>
+                <span className="or">OR</span>
+                <div className="part-2">
+                    <form onSubmit={(e) => this.getDataFromInput(e)}>
+                        <input id="code-input" type="number" maxLength={25}
+                               placeholder="write the code here"
+                               defaultValue={this.state.profile.uid+`0101`}
+                               ref={(input) => this.regCode = input}/>
+                        <span>{this.state.admin_finalMessage}</span>
+                        <input id="code-submit" type="submit" value="confirm"/>
+                    </form>
+                </div>
+            </div>
+        )
+    };
+
+    // The scan in process
+    startScan = () => {
+        QRReader.scan((result) => {
+            console.log('catched', JSON.parse(result));
+            this.getDataFromQR(result);
+        });
+    };
+
+    // admin_allCollection
+    getDataFromQR = (result) => {
+        const {name, uid, event} = JSON.parse(result);
+        this.confirmTransaction(uid, event)
+    };
+
+    getDataFromInput = (e) => {
+        e.preventDefault();
+        const inputVal = this.regCode.value;
+        const uid = inputVal.slice(0,21);
+        const event = inputVal.slice(21, 25);
+        this.confirmTransaction(uid, event)
+    };
+
+    // confirmTransaction = (uid, event) => {
+    //     // let admin_allCollection = {...this.state.admin_allCollection};
+    //     let admin_buyer = {...this.state.admin_buyer};
+    //
+    //     // admin_allCollection[event] = admin_allCollection[event] ? admin_allCollection[event] : [];
+    //     admin_buyer['registeredEvents'] = admin_buyer['registeredEvents'] ? admin_buyer['registeredEvents'] : [];
+    //
+    //     this.firebaseBuyerRef = base.syncState(`users/${uid}/`, {
+    //         context: this,
+    //         state: 'admin_buyer'
+    //     });
+    //
+    //
+    //     if(!checkConfirmation(event, uid)){
+    //         admin_buyer['registeredEvents'][event] = true;
+    //
+    //         admin_allCollection[event].push(uid);
+    //
+    //         this.setState({admin_finalMessage: 'Registration Successful', admin_allCollection, admin_buyer});
+    //         localStorage.setItem('admin_allCollection', JSON.stringify(admin_allCollection))
+    //
+    //     }else{
+    //         this.setState({admin_finalMessage: 'User Already Registered'})
+    //     }
+    //     base.removeBinding(this.firebaseBuyerRef);
+    // };
+
+    confirmTransaction = (uid, event) => {
+        this.firebaseBuyerRef = base.syncState(`users/${uid}/`, {
+            context: this,
+            state: 'admin_buyer'
+        });
+
+        let admin_buyer = {...this.state.admin_buyer};
+        let events = {...this.state.events};
+        let eventParticipants = events[event].participants;
+        admin_buyer['registeredEvents'] = admin_buyer['registeredEvents'] ? admin_buyer['registeredEvents'] : [];
+        eventParticipants = eventParticipants ? eventParticipants : [];
+
+
+        if(!this.checkConfirmation(event, uid)){
+            admin_buyer['registeredEvents'].push(event);
+            eventParticipants.push(uid);
+            this.setState({admin_finalMessage: 'Registration Successful', admin_buyer, events});
+        }else{
+            this.setState({admin_finalMessage: 'User Already Registered'})
+        }
+        base.removeBinding(this.firebaseBuyerRef);
+    };
+
+    // Initiating the Admin Modal
     openAdminModal() {
         this.setState({adminModalIsOpen: true});
-
     }
 
-    afterOpenModal() {
-        // references are now sync'd and can be accessed.
-        // this.refs.subtitle.style.color = '#f00';
-    }
+    // Initiating the scan
     afterOpenAdminModal() {
-        $('#reader').html5_qrcode(function(data){
-            // do something when code is read
-        },
-        function(error){
-            //show read errors
-        }, function(videoError){
-            //the video stream could be opened
-        }
-    )}
+        QRReader.init();
+        this.startScan();
+
+        let $input = $('.part-2 #code-input');
+
+        $input.keyup(function () {
+            const $this = $(this);
+            if ($this.val().length >= 25) {
+                $this.val($this.val().substr(0, 25)).blur();
+            }
+        });
+    }
 
     closeModal() {
         this.setState({modalIsOpen: false, adminModalIsOpen: false});
     }
 
-    renderModal = () => {
-        return(<div className="modal-wrap">
-                    <div className="part-1">
-                        <h3>Show this code</h3>
-                        <img src={this.state.payingForQR} alt="QR Code"/>
-                    </div>
-                    <hr/>
-                    <span>OR</span>
-                    <div className="part-2">
-                        <h3>Show your User ID</h3>
-                        <h1>{this.state.profile.uid.replace(/(\d{5})(\d{5})(\d{5})(\d{6})/, "$1-$2-$3-$4")}</h1>
-                    </div>
-                </div>
-            )};
-
-    renderAdminModal = () => {
-        console.log('admin')
-        return(<div className="admin modal-wrap">
-                    <div className="part-1">
-                        <h3>Capture QR code</h3>
-                        <div id="reader"></div>
-                    </div>
-                    <hr/>
-                    <span>OR</span>
-                    <div className="part-2">
-                        <input type="number" pattern='[(\d{5})(\d{5})(\d{5})(\d{6})]' placeholder="write the code here"/>
-                    </div>
-                </div>
-            )};
-
+    // renderReturn
     render(){
         const customStyles = {
             content : {
@@ -205,20 +289,21 @@ class App extends Component {
         return (
             <div className='contain-all'>
                 <Header onTabClick={this.onTabClick}
-                        activeTab={this.state.activeTab}/>
+                        activeTab={this.state.activeTab}
+                        logout={this.logout} />
                 <div className="card-wrap">
-                    {Object.keys(this.state.events)
-                        .filter((key) =>this.filterCards(key))
-                        .map( (key) =>
-                            <EventCard key={key} index={key} toggleRegistration={this.toggleRegistration}
-                                       event={this.state.events[key]}
-                                       openModal={this.openModal}
-                                       openAdminModal={this.openAdminModal}/>
-                        )}
+                    { this.state.events &&
+                        Object.keys(this.state.events)
+                            .filter((key) =>this.filterCards(key))
+                            .map( (key) =>
+                                <EventCard key={key} index={key} event={this.state.events[key]}
+                                           confirmed={this.checkConfirmation(key, this.state.profile.uid)}
+                                           openModal={this.openModal}
+                                           openAdminModal={this.openAdminModal}/>
+                    )}
                 </div>
                 <Modal
                     isOpen={this.state.modalIsOpen}
-                    onAfterOpen={this.afterOpenModal}
                     style={customStyles}
                     onRequestClose={this.closeModal}
                     contentLabel="Checkout Modal"
