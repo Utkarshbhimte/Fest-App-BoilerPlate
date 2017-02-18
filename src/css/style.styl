@@ -36,7 +36,7 @@ header
       padding .5em 1em
       transition all .3s ease-in
       height 3em
-      min-width 30vw
+      min-width 20vw
       line-height: 2em;
       text-align center
       user-select none
@@ -135,6 +135,8 @@ header
           margin-bottom .5em
           margin-right .5em
 .modal-wrap
+  .active
+    background-color blue
   h3
     margin 0
     margin-bottom 1.5em
@@ -181,3 +183,32 @@ header
         font-size 1.5em
         &::placeholder
           text-transform uppercase
+.notification-wrapper
+  form
+    padding 3em 5vw 1em 5vw
+    input[type='submit']
+      background-color transparent
+      margin-left 1em
+      width: 6em;
+      font-size: 1.5em;
+      outline none
+      border none
+    input[type='text']
+      width: calc(100% - 9em)
+      border none
+      outline none
+      padding: 1em
+      font-size: 1.3em
+  .notification
+    background-color #ffffff
+    padding 1em 2em
+    margin 2em auto
+    h4
+      margin 0.5em 0 1em 0
+      text-align left
+      font-size 1.5em
+    span
+      text-align right
+      display block
+      &.sender
+        font-weight 700

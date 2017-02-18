@@ -1,4 +1,4 @@
-const allEvents= {
+export const allEvents= {
     '0102': {
         name: "Movie Clip Recreation",
         desc: "6 in team. 2-minute video clip will be provided. 5+2 minutes are given to recreate. Most comic scene will be rewarded. Content must not be vulgar",
@@ -321,4 +321,15 @@ const allEvents= {
         participants: ['']
     }
 };
-export default allEvents;
+
+
+export const sampleNotifications = {
+        '1487368950': {
+            sender: 'AwesomeFest17',
+            caption: 'Welcome to the Notification center'
+        },
+        '1487369134': {
+            sender: 'AwesomeFest17',
+            caption: 'You will recieve all the notifications here'
+        }
+    }

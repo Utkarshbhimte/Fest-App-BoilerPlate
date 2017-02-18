@@ -4,10 +4,11 @@ import $ from 'jquery'
 import qrcode from 'qrcode-js'
 import Header from './header'
 import EventCard from './EventCard'
-import allEvents from '../sample-events'
+import {allEvents} from '../sample-events'
 import Modal from 'react-modal'
 import QRReader from '../qrscan'
 import base from '../base'
+import NotificationsWrap from './notifications-wrap'
 
 
 class App extends Component {
@@ -17,7 +18,7 @@ class App extends Component {
             events: null,                // Object of all arrays
             registeredEvents: [''],      // State of Confirmation of Registration
             profile: {},                 // User's Profile
-            activeTab: 1,                // Tab Status
+            activeTab: 3,                // Tab Status
             modalIsOpen: false,          // Modal State
             adminModalIsOpen: false,     // Modal State
             payingForQR: null,           // CurrentPayment
@@ -28,7 +29,6 @@ class App extends Component {
             admin_allCollection: {}
         };
         this.onTabClick = this.onTabClick.bind(this);
-        // this.toggleRegistration = this.toggleRegistration.bind(this);
         this.openModal = this.openModal.bind(this);
         this.openAdminModal = this.openAdminModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
@@ -129,14 +129,18 @@ class App extends Component {
     // Modal for 'Pay-and-Register'
     renderModal = () => {
         const data = this.state.profile.uid+this.state.payingFor;
+
         return(
             <div className="modal-wrap">
+                <div className="success">
+                    <span className="text">Success</span>
+                </div>
                 <div className="part-1">
                     <h3>Show this code</h3>
                     <img src={this.state.payingForQR} alt="QR Code"/>
                 </div>
                 <hr/>
-                <span>OR</span>
+                <span className="or">OR</span>
                 <div className="part-2">
                     <h3>Show your User ID</h3>
                     <h1>{data.replace(/(\d{5})(\d{5})(\d{5})(\d{5})(\d{5})/, "$1-$2-$3-$4-$5")}</h1>
@@ -191,33 +195,6 @@ class App extends Component {
         this.confirmTransaction(uid, event)
     };
 
-    // confirmTransaction = (uid, event) => {
-    //     // let admin_allCollection = {...this.state.admin_allCollection};
-    //     let admin_buyer = {...this.state.admin_buyer};
-    //
-    //     // admin_allCollection[event] = admin_allCollection[event] ? admin_allCollection[event] : [];
-    //     admin_buyer['registeredEvents'] = admin_buyer['registeredEvents'] ? admin_buyer['registeredEvents'] : [];
-    //
-    //     this.firebaseBuyerRef = base.syncState(`users/${uid}/`, {
-    //         context: this,
-    //         state: 'admin_buyer'
-    //     });
-    //
-    //
-    //     if(!checkConfirmation(event, uid)){
-    //         admin_buyer['registeredEvents'][event] = true;
-    //
-    //         admin_allCollection[event].push(uid);
-    //
-    //         this.setState({admin_finalMessage: 'Registration Successful', admin_allCollection, admin_buyer});
-    //         localStorage.setItem('admin_allCollection', JSON.stringify(admin_allCollection))
-    //
-    //     }else{
-    //         this.setState({admin_finalMessage: 'User Already Registered'})
-    //     }
-    //     base.removeBinding(this.firebaseBuyerRef);
-    // };
-
     confirmTransaction = (uid, event) => {
         this.firebaseBuyerRef = base.syncState(`users/${uid}/`, {
             context: this,
@@ -261,6 +238,20 @@ class App extends Component {
         });
     }
 
+    // Initiating the scan
+    afterOpenModal() {
+        if(this.props.registeredEvents && (this.props.registeredEvents.indexOf(this.props.payingFor) !== -1)){
+            $('.modal-wrap .success').addClass('active').delay(10000).queue(function(){
+                $(this).removeClass('active');
+            });
+        }
+        if(this.props.registeredEvents && !(this.props.registeredEvents.indexOf(this.props.payingFor) !== -1)){
+            $('.modal-wrap .success').addClass('active').delay(10000).queue(function(){
+                $(this).removeClass('active');
+            });
+        }
+    }
+
     closeModal() {
         this.setState({modalIsOpen: false, adminModalIsOpen: false});
     }
@@ -291,34 +282,45 @@ class App extends Component {
                 <Header onTabClick={this.onTabClick}
                         activeTab={this.state.activeTab}
                         logout={this.logout} />
-                <div className="card-wrap">
-                    { this.state.events &&
-                        Object.keys(this.state.events)
-                            .filter((key) =>this.filterCards(key))
-                            .map( (key) =>
-                                <EventCard key={key} index={key} event={this.state.events[key]}
-                                           confirmed={this.checkConfirmation(key, this.state.profile.uid)}
-                                           openModal={this.openModal}
-                                           openAdminModal={this.openAdminModal}/>
-                    )}
-                </div>
-                <Modal
-                    isOpen={this.state.modalIsOpen}
-                    style={customStyles}
-                    onRequestClose={this.closeModal}
-                    contentLabel="Checkout Modal"
-                >
-                    {this.renderModal()}
-                </Modal>
-                <Modal
-                    isOpen={this.state.adminModalIsOpen}
-                    onAfterOpen={this.afterOpenAdminModal}
-                    style={customStyles}
-                    onRequestClose={this.closeModal}
-                    contentLabel="Admin Modal"
-                >
-                    {this.renderAdminModal()}
-                </Modal>
+                { this.state.activeTab < 3 &&
+                    <div>
+                        <div className="card-wrap">
+                            { this.state.events &&
+                            Object.keys(this.state.events)
+                                .filter((key) =>this.filterCards(key))
+                                .map( (key) =>
+                                    <EventCard key={key} index={key} event={this.state.events[key]}
+                                               confirmed={this.checkConfirmation(key, this.state.profile.uid)}
+                                               openModal={this.openModal}
+                                               openAdminModal={this.openAdminModal}/>
+                                )}
+                        </div>
+                        <Modal
+                            isOpen={this.state.modalIsOpen}
+                            style={customStyles}
+                            onAfterOpen={this.afterOpenModal}
+                            onRequestClose={this.closeModal}
+                            contentLabel="Checkout Modal"
+                            registeredEvents={this.state.profile.registeredEvents}
+                            payingFor={this.state.payingFor}
+                        >
+                            {this.renderModal()}
+                        </Modal>
+                        <Modal
+                            isOpen={this.state.adminModalIsOpen}
+                            onAfterOpen={this.afterOpenAdminModal}
+                            style={customStyles}
+                            onRequestClose={this.closeModal}
+                            contentLabel="Admin Modal"
+                        >
+                            {this.renderAdminModal()}
+                        </Modal>
+                    </div>
+                }
+
+                { this.state.activeTab === 3 &&
+                    <NotificationsWrap admin={this.getAdminAccess()} />
+                }
             </div>
         );
     }
