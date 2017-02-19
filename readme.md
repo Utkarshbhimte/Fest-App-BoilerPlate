@@ -27,3 +27,11 @@ Firebase Refs
                         syncs the '/user/${profile.uid}' to this.state.profile
 {firebaseBuyerRef} => binds at confirmTransaction and End at confirmTransaction,
                         syncs the '/user/${data.uid}' to this.state.admin_buyer
+
+
+Things to work on
+-----------------
+* Ping the admin when we the registeration is confirmed
+* Notify the participant when we the registeration is confirmed
+* Change the recieve payemnt button to FAB
+*
