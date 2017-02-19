@@ -34,4 +34,8 @@ Things to work on
 * Ping the admin when we the registeration is confirmed
 * Notify the participant when we the registeration is confirmed
 * Change the recieve payemnt button to FAB
-*
+
+
+Deploying to gh-pages
+---------------------
+git subtree push --prefix dist origin gh-pages
