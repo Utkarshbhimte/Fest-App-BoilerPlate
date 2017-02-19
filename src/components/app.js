@@ -81,7 +81,7 @@ class App extends Component {
     }
 
     componentWillUnmount(){
-        if(this.state.profile){
+        if(this.state.profile !== {}){
             base.removeBinding(this.firebaseUserRef);
         }
         if(this.getAdminAccess){
