@@ -19,6 +19,11 @@ class Login extends Component {
     }
 
     authHandler(err, authData){
+        console.log('authData:',authData)
+        if (err) {
+            console.error(err);
+            return;
+        }
         // The User Object
         const user  = authData.user.providerData[0];
 
