@@ -1,3 +1,29 @@
+.ReactModal__Content--after-open {
+  top: 50% !important;
+  opacity: 1 !important;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+.ReactModal__Content--before-close {
+  top: 20% !important;
+  opacity: 0 !important;
+}
+.ReactModal__Overlay--after-open {
+  opacity: 1 !important;
+}
+.ReactModal__Overlay--before-close {
+  opacity: 0 !important;
+}
+.user-message {
+  top: 0;
+  left: 91vw;
+}
+.user-message.entry {
+  left: 0;
+}
+.user-message.exit {
+  left: -91vw !important;
+}
 @font-face {
   font-family: "haymakerregular";
   src: url("./fonts/haymaker-webfont.eot");
@@ -242,6 +268,12 @@ body input {
 header {
   padding: 0 1em;
 }
+header .logout {
+  position: absolute;
+  font-size: 3em;
+  top: 0.4em;
+  right: 0.4em;
+}
 header .tabs-wrap {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -311,7 +343,16 @@ header .tabs-wrap .tab.active {
 .card-wrap .card .basic .day-wrap h3 {
   margin: 0;
 }
-.card-wrap .card .basic fav {
+.card-wrap .card .basic .conf {
+  color: #66a6ff;
+  displa: inline-block;
+  background: #212121 !important;
+  border: 2px solid #66a6ff;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.5em 0;
+}
+.card-wrap .card .basic a.fav {
   display: block;
   margin: 0 auto;
   width: 48.06px;
@@ -321,21 +362,21 @@ header .tabs-wrap .tab.active {
   -webkit-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
 }
-.card-wrap .card .basic fav.active {
+.card-wrap .card .basic a.fav.active {
   background: -webkit-linear-gradient(330deg, #89f7fe 0%, #66a6ff 100%);
   background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
   border: 0;
   -webkit-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
 }
-.card-wrap .card .basic fav[aria-confirmed='true'] {
+.card-wrap .card .basic a.fav[aria-confirmed='true'] {
   border-radius: 0;
   height: auto;
   color: #66a6ff;
   background: #212121 !important;
   border: 2px solid #66a6ff;
 }
-.card-wrap .card .basic fav[aria-confirmed='true']:before {
+.card-wrap .card .basic a.fav[aria-confirmed='true']:before {
   content: 'conf';
   text-transform: uppercase;
   display: inline-block;
@@ -391,8 +432,40 @@ header .tabs-wrap .tab.active {
   margin-bottom: 0.5em;
   margin-right: 0.5em;
 }
-.modal-wrap .active {
-  background-color: #00f;
+.modal-wrap {
+  overflow-x: hidden;
+}
+.modal-wrap .user-message {
+  height: 100%;
+  position: absolute;
+  width: 90vw;
+  color: #fff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  text-transform: uppercase;
+  font-size: 3em;
+  letter-spacing: 5px;
+  -webkit-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+.modal-wrap .user-message.success {
+  background-color: #01ff70;
+  left: 0;
+  -webkit-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+.modal-wrap .user-message.error {
+  background-color: #ff4136;
+  left: 0;
+  -webkit-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 .modal-wrap h3 {
   margin: 0;
@@ -490,4 +563,26 @@ header .tabs-wrap .tab.active {
 }
 .notification-wrapper .notification span.sender {
   font-weight: 700;
+}
+.FAB {
+  position: absolute;
+  bottom: 5vh;
+  right: 5vw;
+  width: 2em;
+  height: 2em;
+  font-size: 3.5em;
+  line-height: 2em;
+  text-align: center;
+  border-radius: 50%;
+  background-color: #fff;
+  color: #66a6ff;
+  box-shadow: 0 15px 32px -7px #212121;
+  -webkit-transition: all 0.1s ease-out;
+  transition: all 0.1s ease-out;
+}
+.FAB:focus,
+.FAB:hover {
+  -webkit-transform: translateY(7.5px);
+          transform: translateY(7.5px);
+  box-shadow: 0 0 0 0;
 }

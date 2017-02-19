@@ -3,11 +3,20 @@ import React, {Component} from 'react';
 class EventCard extends Component {
     constructor(){
         super();
-        this.getAdminAccess = this.getAdminAccess.bind(this)
+        this.getAdminAccess = this.getAdminAccess.bind(this);
+        this.circleClick = this.circleClick.bind(this)
 
     }
     getAdminAccess = () => {
         return true;
+    }
+
+    circleClick = () => {
+        if(this.getAdminAccess){
+            this.props.openAdminModal();
+        }else{
+            this.props.openModal(this.props.index)
+        }
     }
     render() {
         const event = this.props.event;
@@ -19,11 +28,11 @@ class EventCard extends Component {
                         <span>DAY</span>
                         <h3>{day}</h3>
                     </div>
-                    <fav aria-confirmed={ this.props.confirmed }>
-                    </fav>
+                    { this.props.confirmed &&
+                        <span className="conf">Confirmed</span>
+                    }
                     <div className="details">
                         <span className="location">{event.location}</span>
-                        {/*<span className="contact">{event.contact}</span>*/}
                     </div>
                 </div>
                 <div className="main">
@@ -42,9 +51,6 @@ class EventCard extends Component {
                         <a>Contact</a>
                         { !this.props.confirmed && this.getAdminAccess &&
                             <a onClick={ () => {this.props.openModal(this.props.index)}}>Register and Pay</a>
-                        }
-                        { this.getAdminAccess &&
-                            <a onClick={ () => {this.props.openAdminModal()} }> Recieve Payment</a>
                         }
                     </div>
                 </div>

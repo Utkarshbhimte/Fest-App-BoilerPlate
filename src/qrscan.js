@@ -93,14 +93,14 @@ QRReader.init = () => {
                 }
             })
             .catch(function (error) {
-                showErrorMsg();
                 console.error("Error occurred : ", error);
+                showErrorMsg();
             });
     }
 
     function showErrorMsg() {
         document.querySelector('.custom-btn').style.display = "none"; //Hide scan button, if error
-        console.log('Unable to open the camera, provide permission to access the camera', 5000);
+        alert('Unable to open the camera, provide permission to access the camera');
     }
 }
 

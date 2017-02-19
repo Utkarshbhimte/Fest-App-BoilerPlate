@@ -5,3 +5,41 @@
   appear Must set transitionAppear={true} on animation component
 */
 
+//.modal-enter
+//  transition all .25s
+//  transform translateY(100%) // start off screen
+//  &.modal-enter-active
+//    transform translateY(0) // put it in it's normal resting spot
+//
+//.modal-leave
+//  transition all .25s
+//  position absolute
+//  left 0
+//  bottom 0
+//  transform translateY(0) // start it where it is
+//  &.modal-leave-active
+//    transform translateY(-100%) // start it where it is
+
+.ReactModal__Content--after-open
+  top: 50% !important
+  opacity 1 !important
+  transition all .3s ease-in-out
+
+.ReactModal__Content--before-close
+  top: 20% !important
+  opacity 0 !important
+
+.ReactModal__Overlay--after-open
+  opacity 1 !important
+
+.ReactModal__Overlay--before-close
+  opacity 0 !important
+
+
+.user-message
+  top: 0
+  left: 91vw
+  &.entry
+    left: 0
+  &.exit
+    left: -91vw !important

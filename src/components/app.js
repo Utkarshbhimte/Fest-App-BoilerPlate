@@ -7,8 +7,10 @@ import EventCard from './EventCard'
 import {allEvents} from '../sample-events'
 import Modal from 'react-modal'
 import QRReader from '../qrscan'
+import moment from 'moment'
 import base from '../base'
 import NotificationsWrap from './notifications-wrap'
+import ModalMessage from './modal-message'
 
 
 class App extends Component {
@@ -18,14 +20,17 @@ class App extends Component {
             events: null,                // Object of all arrays
             registeredEvents: [''],      // State of Confirmation of Registration
             profile: {},                 // User's Profile
-            activeTab: 3,                // Tab Status
+            activeTab: 1,                // Tab Status
             modalIsOpen: false,          // Modal State
             adminModalIsOpen: false,     // Modal State
             payingForQR: null,           // CurrentPayment
             payingFor: false,            // CurrentPayment
             admin_getInfo: 'No Result',
-            admin_finalMessage: '',
             admin_buyer: null,
+            admin_registrationResponse: {
+                type: null,
+                msg: 'User already Exist'
+            },
             admin_allCollection: {}
         };
         this.onTabClick = this.onTabClick.bind(this);
@@ -38,7 +43,9 @@ class App extends Component {
         this.getDataFromQR = this.getDataFromQR.bind(this);
         this.getDataFromInput = this.getDataFromInput.bind(this);
         this.checkConfirmation = this.checkConfirmation.bind(this)
-        this.logout = this.logout.bind(this)
+        this.logout = this.logout.bind(this);
+        this.triggerAdminModalNotification = this.triggerAdminModalNotification.bind(this);
+
     }
 
     // Importing all the Events
@@ -50,7 +57,7 @@ class App extends Component {
             let profile = JSON.parse(localStorageUser);
             let admin_allCollection = JSON.parse(localStorageCollection);
 
-            profile['registeredEvents'] = profile['registeredEvents'] ? profile['registeredEvents'] : {};
+            profile['registeredEvents'] = profile['registeredEvents'] ? profile['registeredEvents'] : [''];
             this.firebaseUserRef = base.syncState(`users/${profile.uid}/`, {
                 context: this,
                 state: 'profile'
@@ -67,6 +74,10 @@ class App extends Component {
                 state: 'events'
             });
         }
+
+        // When you want to force push the sample Events to the server
+        // this.setState({ events: allEvents});
+
     }
 
     componentWillUnmount(){
@@ -108,7 +119,7 @@ class App extends Component {
             return (day === '01');
         }else if(this.state.activeTab === 2){
             return (day === '02');
-        }else if(this.state.activeTab === 0){
+        }else if(this.state.activeTab === 0 && this.state.profile.registeredEvents){
             return ( this.state.profile.registeredEvents.indexOf(key) !== -1 );
         }
     };
@@ -132,9 +143,10 @@ class App extends Component {
 
         return(
             <div className="modal-wrap">
-                <div className="success">
-                    <span className="text">Success</span>
-                </div>
+                { this.state.admin_registrationResponse.type !== null &&
+                <ModalMessage message={this.state.admin_registrationResponse.msg}
+                              msgType={this.state.admin_registrationResponse.type} />
+                }
                 <div className="part-1">
                     <h3>Show this code</h3>
                     <img src={this.state.payingForQR} alt="QR Code"/>
@@ -165,8 +177,14 @@ class App extends Component {
                                placeholder="write the code here"
                                defaultValue={this.state.profile.uid+`0101`}
                                ref={(input) => this.regCode = input}/>
-                        <span>{this.state.admin_finalMessage}</span>
-                        <input id="code-submit" type="submit" value="confirm"/>
+
+                        { this.state.admin_registrationResponse.type !== null &&
+                            <ModalMessage message={this.state.admin_registrationResponse.msg}
+                                          msgType={this.state.admin_registrationResponse.type} />
+                        }
+                        { !this.state.admin_registrationResponse.type &&
+                            <input id="code-submit" type="submit" value="confirm"/>
+                        }
                     </form>
                 </div>
             </div>
@@ -211,11 +229,27 @@ class App extends Component {
         if(!this.checkConfirmation(event, uid)){
             admin_buyer['registeredEvents'].push(event);
             eventParticipants.push(uid);
-            this.setState({admin_finalMessage: 'Registration Successful', admin_buyer, events});
+            this.triggerAdminModalNotification('Registration Successful', true);
+            this.setState({admin_buyer, events});
         }else{
-            this.setState({admin_finalMessage: 'User Already Registered'})
+            this.triggerAdminModalNotification('User Already Exist', false);
         }
         base.removeBinding(this.firebaseBuyerRef);
+    };
+
+    // To set the text nad type of the modal message and also to set null after
+    triggerAdminModalNotification = (msg, type) => {
+        let admin_registrationResponse = {...this.state.admin_registrationResponse}
+        admin_registrationResponse['msg'] = msg;
+        admin_registrationResponse['type'] = type;
+        this.setState({admin_registrationResponse});
+        console.log('triggerAdminModalNotification on ', moment().format());
+
+        setTimeout(function(){
+            console.log('setting null on ', moment().format());
+            admin_registrationResponse['type'] = null;
+            this.setState({admin_registrationResponse})
+        }.bind(this),3000)
     };
 
     // Initiating the Admin Modal
@@ -240,15 +274,10 @@ class App extends Component {
 
     // Initiating the scan
     afterOpenModal() {
-        if(this.props.registeredEvents && (this.props.registeredEvents.indexOf(this.props.payingFor) !== -1)){
+        if(this.state.profile.registeredEvents && (this.state.profile.registeredEvents.indexOf(this.props.payingFor) !== -1)){
             $('.modal-wrap .success').addClass('active').delay(10000).queue(function(){
-                $(this).removeClass('active');
-            });
-        }
-        if(this.props.registeredEvents && !(this.props.registeredEvents.indexOf(this.props.payingFor) !== -1)){
-            $('.modal-wrap .success').addClass('active').delay(10000).queue(function(){
-                $(this).removeClass('active');
-            });
+                        $(this).removeClass('active');
+                });
         }
     }
 
@@ -260,7 +289,7 @@ class App extends Component {
     render(){
         const customStyles = {
             content : {
-                top                   : '50%',
+                top                   : '20%',
                 left                  : '50%',
                 right                 : 'auto',
                 bottom                : 'auto',
@@ -271,9 +300,13 @@ class App extends Component {
                 width                 : '90vw',
                 borderRadius          : '0px',
                 padding               : '0',
-                border                : 'none'
+                border                : 'none',
+                transition            : 'all .3s ease-in-out',
+                opacity               : '0',
             },
             overlay: {
+                transition            : 'all .3s ease-in-out',
+                opacity               : '0',
                 backgroundColor        : 'rgba(0,0,0, 0.74902)'
             }
         };
@@ -294,13 +327,17 @@ class App extends Component {
                                                openModal={this.openModal}
                                                openAdminModal={this.openAdminModal}/>
                                 )}
+                            { this.getAdminAccess &&
+                                <a className="FAB" onClick={ () => {this.openAdminModal()}}>P</a>
+                            }
                         </div>
                         <Modal
                             isOpen={this.state.modalIsOpen}
                             style={customStyles}
-                            onAfterOpen={this.afterOpenModal}
+                            onAfterOpen={this.afterOpenModal(this.state.profile.registeredEvents)}
                             onRequestClose={this.closeModal}
-                            contentLabel="Checkout Modal"
+                            contentLabel={"Checkout Modal"}
+                            closeTimeoutMS={300}
                             registeredEvents={this.state.profile.registeredEvents}
                             payingFor={this.state.payingFor}
                         >
@@ -310,6 +347,7 @@ class App extends Component {
                             isOpen={this.state.adminModalIsOpen}
                             onAfterOpen={this.afterOpenAdminModal}
                             style={customStyles}
+                            closeTimeoutMS={300}
                             onRequestClose={this.closeModal}
                             contentLabel="Admin Modal"
                         >
@@ -317,7 +355,6 @@ class App extends Component {
                         </Modal>
                     </div>
                 }
-
                 { this.state.activeTab === 3 &&
                     <NotificationsWrap admin={this.getAdminAccess()} />
                 }

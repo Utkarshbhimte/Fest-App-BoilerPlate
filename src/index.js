@@ -8,7 +8,7 @@ import './css/style.css'
 
 const Root = () => {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename='/Fest-App-BoilerPlate/'>
             <div>
                 <Match exactly pattern='/' component={ App }/>
                 <Match exactly pattern='/login' component={ Login }/>
