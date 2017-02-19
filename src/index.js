@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import {BrowserRouter, Match} from 'react-router'
+import {BrowserRouter, Match, Miss } from 'react-router'
 
 import App from './components/app'
 import Login from './components/login'
@@ -12,6 +12,7 @@ const Root = () => {
             <div>
                 <Match exactly pattern='/' component={ App }/>
                 <Match exactly pattern='/login' component={ Login }/>
+                <Miss component={ App } />
             </div>
         </BrowserRouter>
     )

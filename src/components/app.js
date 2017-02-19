@@ -139,7 +139,7 @@ class App extends Component {
 
     // Modal for 'Pay-and-Register'
     renderModal = () => {
-        const data = this.state.profile.uid+this.state.payingFor;
+        const data = this.state.profile.uid ? this.state.profile.uid+this.state.payingFor : '';
 
         return(
             <div className="modal-wrap">
