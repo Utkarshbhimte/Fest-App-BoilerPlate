@@ -38,4 +38,4 @@ Things to work on
 
 Deploying to gh-pages
 ---------------------
-git subtree push --prefix dist origin gh-pages
+git subtree push --prefix build origin gh-pages
